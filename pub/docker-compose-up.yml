@@ -1,0 +1,58 @@
+version: '3.4'
+services:
+
+  # Serviços que a aplicação principal é dependente.
+  db:
+    image: postgres:alpine
+    restart: always
+    container_name: postgres
+    volumes:
+      - postgres-data:/var/lib/postgres
+    networks:
+      - database
+    ports:
+      - 5342:5342
+    environment:
+      - POSTGRES_DB=user-invoices 
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+  
+  cache:
+    image: memcached:alpine
+    restart: always
+    container_name: memcached
+    volumes:
+      - memcached-data:/var/lib/memcached
+    networks:
+      - cache
+    ports:
+      - 11211:11211
+    environment:
+      - MEMCACHED_CACHE_SIZE=64
+
+  # Aplicação principal.
+  app:
+    image: dhsrocha/user-invoices
+    restart: always
+    container_name: dhsrocha/user-invoices
+    depends_on:
+      - db
+      - cache
+    links:
+      - db
+      - cache
+    ports:
+      - 50:50
+      - 5000:5000
+
+networks:
+  database:
+    driver: bridge
+  cache:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    name: user-invoices_postgres-data
+  memcached-data:
+    name: user-invoices_memcached-data

@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  # Construção delegada para o dockerfile
+  container-build-delegated-to-dockerfile:
+    image: dhsrocha/user-invoices:latest
+    build:
+      context: .
+      dockerfile: Dockerfile # Módulo singular
+  # Aqui podem ser listados pontos de acesso para diversos Dockerfiles
+
