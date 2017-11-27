@@ -34,7 +34,7 @@ services:
   app:
     image: dhsrocha/user-invoices
     restart: always
-    container_name: dhsrocha/user-invoices
+    container_name: user-invoices
     depends_on:
       - db
       - cache
@@ -42,7 +42,6 @@ services:
       - db
       - cache
     ports:
-      - 50:50
       - 5000:5000
 
 networks:

@@ -1,16 +1,36 @@
-# Container vazio.
-FROM scratch
+FROM golang:alpine AS builder
+
+
+# Copiar fontes para a imagem
+COPY src /go/src/
+
+# Gerenciamento de dependências
+# RUN apk --no-cache add git 
+# RUN go get github.com/tools/godep
+# RUN godep save
+
+# Aplicar procedimento de construção da aplicação Go
+RUN go install github.com/dhsrocha/user-invoices
+RUN go build github.com/dhsrocha/user-invoices
+
+# ::: ###### :::
+
+FROM alpine AS deployer
 
 # Metadata
-LABEL Vendor="Diego Rocha" \
-      Description="Gestor de chamadas de usuários" \
-      Version="0.1.0"
+LABEL maintainer="Diego Rocha" \
+      vendor="Diego Rocha" \
+      description="Gestor de chamadas de usuários" \
+      version="0.1.0"
 
-# Copiar binários
-# ADD ./ /go/bin/user-invoices
+RUN apk --no-cache add ca-certificates
 
-# 
-EXPOSE 5000:50
-# ENTRYPOINT ["/bin/user-invoices"]
+WORKDIR /root/
 
+COPY --from=builder /bin .
+
+# Expor a porta e comando
+# ENTRYPOINT ["./bin"]
+
+EXPOSE 5000
 

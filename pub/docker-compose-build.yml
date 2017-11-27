@@ -4,7 +4,7 @@ services:
   container-build-delegated-to-dockerfile:
     image: dhsrocha/user-invoices:latest
     build:
-      context: .
-      dockerfile: Dockerfile # Módulo singular
+      context: ../
+      dockerfile: ./pub/Dockerfile # Módulo singular
   # Aqui podem ser listados pontos de acesso para diversos Dockerfiles
 

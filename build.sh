@@ -10,41 +10,28 @@ echo;echo "::: Inicio da construção da imagem :::";echo
 
 # :::::::::::::::::::::::::::::::
 
-# Instala 'docker-compose'
-if [[ ! -f $COMPOSE_PATH ]]
-then  
-  echo;echo ":: Instalar 'docker-compose' ::";echo
+{ # Instala 'docker-compose'
+
+  if [[ ! -f $COMPOSE_PATH ]];then  
+
+    echo;echo ":: Instalar 'docker-compose' ::";echo
   
-  sudo curl -L --fail $DOWNLOAD_URL -o $COMPOSE_PATH
-  
-  sudo chmod +x $COMPOSE_PATH
-fi
+    sudo apt-get install --upgrade docker
 
-# :::::::::::::::::::::::::::::::
+    sudo curl -L --fail $DOWNLOAD_URL -o $COMPOSE_PATH
 
-{ # ::: Construção do container 'golang:alpine' :::
-
-  if [[ -z `docker images -q golang:alpine` ]]; then
-
-    echo;echo ":: Instalar container 'golang' ::";echo
-  
-    docker run -ti -d --name golang golang:alpine
-
+    sudo chmod +x $COMPOSE_PATH
   fi
-
-  # ::: Construção da aplicação :::
-  
-  echo;echo ":: Executar construção da aplicação ::";echo
-
-  docker exec golang go clean test build ./src
 
 } || {
 
-  echo;echo ':: Falha na construção da aplicação. ::';echo
+  echo;echo ":: Falha na instalação das ferramentas docker. ::"
 
   exit 1
 
 } && { # Constroi imagem da aplicação
+
+  echo;echo ":: Executar construção da imagem docker ::";echo
 
   sudo docker-compose \
        -f pub/docker-compose-build.yml \
@@ -58,6 +45,9 @@ fi
 
 } && { # Ativa serviços dependentes e container da aplicação
 
+  echo;echo ":: Executar construção do container docker ::";echo
+
+  # Executa ativação
   sudo docker-compose \
        -f pub/docker-compose-up.yml \
        up -d # Detached
