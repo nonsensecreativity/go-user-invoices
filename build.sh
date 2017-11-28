@@ -3,6 +3,10 @@
 # Propriedades
 DOCKER_COMPOSE_VERSION=1.17.1
 COMPOSE_PATH="/usr/local/bin/docker-compose"
+
+COMPOSE_YML_IMAGE="pub/docker-compose-build.yml"
+COMPOSE_YML_CONTAINER="pub/docker-compose-up.yml"
+
 DOWNLOAD_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/run.sh"
 
 # Roteiro de construção
@@ -34,12 +38,24 @@ echo;echo "::: Inicio da construção da imagem :::";echo
   echo;echo ":: Executar construção da imagem docker ::";echo
 
   sudo docker-compose \
-       -f pub/docker-compose-build.yml \
+       -f $COMPOSE_YML_IMAGE \
        build
 
 } || {
 
-  echo;echo ":: Falha na construção do container. ::"
+  echo;echo ":: Removendo imagens defeituosas criadas. ::";echo
+
+  sudo docker-compose \
+       --file $COMPOSE_YML_IMAGE \
+       stop 
+  sudo docker-compose \
+       --file $COMPOSE_YML_IMAGE \
+       rm -f
+  sudo docker-compose \
+       -f $COMPOSE_YML_CONTAINER \
+       down -rmi -v 
+
+  echo;echo ":: Falha na construção da imagem. ::";echo
 
   exit 1
 
@@ -49,12 +65,18 @@ echo;echo "::: Inicio da construção da imagem :::";echo
 
   # Executa ativação
   sudo docker-compose \
-       -f pub/docker-compose-up.yml \
+       -f $COMPOSE_YML_CONTAINER \
        up -d # Detached
 
 } || {
 
-  echo;echo ":: Falha na ativação. ::"
+  echo;echo ":: Removendo containeres defeituosos criados. ::";echo
+
+  sudo docker-compose \
+       -f $COMPOSE_YML_CONTAINER \
+       down -v 
+
+  echo;echo ":: Falha na ativação. ::";echo
 
   exit 1
 

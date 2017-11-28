@@ -1,36 +1,33 @@
 FROM golang:alpine AS builder
 
-
 # Copiar fontes para a imagem
 COPY src /go/src/
 
 # Gerenciamento de dependências
 # RUN apk --no-cache add git 
-# RUN go get github.com/tools/godep
-# RUN godep save
+# RUN go get github.com/golang/dep/cmd/dep
+# RUN bin/dep save
 
 # Aplicar procedimento de construção da aplicação Go
-RUN go install github.com/dhsrocha/user-invoices
-RUN go build github.com/dhsrocha/user-invoices
+RUN go clean
+RUN go build src/main.go
 
 # ::: ###### :::
 
 FROM alpine AS deployer
 
-# Metadata
-LABEL maintainer="Diego Rocha" \
-      vendor="Diego Rocha" \
-      description="Gestor de chamadas de usuários" \
-      version="0.1.0"
-
+# 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# Copiar binários da imagem anterior para esta
+COPY --from=builder ./bin root/
 
-COPY --from=builder /bin .
+# Definir WORKDIR
+WORKDIR root/
 
-# Expor a porta e comando
-# ENTRYPOINT ["./bin"]
+# Definir porta exposta
+ENTRYPOINT 5000
 
-EXPOSE 5000
+# Definir ponto de entrada
+CMD ["main"]
 

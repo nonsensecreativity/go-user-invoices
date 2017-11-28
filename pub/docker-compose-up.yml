@@ -8,14 +8,16 @@ services:
     container_name: postgres
     volumes:
       - postgres-data:/var/lib/postgres
+      - ../rsc/sql/:/docker-entrypoint-initdb.d/
     networks:
       - database
     ports:
-      - 5342:5342
+      - 5432:5432
     environment:
-      - POSTGRES_DB=user-invoices 
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=user_invoices 
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=app
+      - POSTGRES_INITDB_ARGS=--data-checksums
   
   cache:
     image: memcached:alpine
@@ -30,8 +32,8 @@ services:
     environment:
       - MEMCACHED_CACHE_SIZE=64
 
-  # Aplicação principal.
-  app:
+  # Aplicação principal construída localmente.
+  web:
     image: dhsrocha/user-invoices
     restart: always
     container_name: user-invoices
