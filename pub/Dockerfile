@@ -3,20 +3,25 @@ FROM golang:alpine AS builder
 # Copiar fontes para a imagem
 COPY src /go/src/
 
-# Gerenciamento de dependências
+# Gerir de dependências
 # RUN apk --no-cache add git 
 # RUN go get github.com/golang/dep/cmd/dep
 # RUN bin/dep save
 
 # Aplicar procedimento de construção da aplicação Go
 RUN go clean
-RUN go build src/main.go
+
+# Testes unitários (aplicação e banco de dados) e integração
+RUN go test -run ''
+
+# Construir a aplicação validada.
+RUN go install user-invoices
 
 # ::: ###### :::
 
 FROM alpine AS deployer
 
-# 
+# Inserir certificado ao container
 RUN apk --no-cache add ca-certificates
 
 # Copiar binários da imagem anterior para esta
