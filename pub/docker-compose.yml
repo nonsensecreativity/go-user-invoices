@@ -33,10 +33,25 @@ services:
       - MEMCACHED_CACHE_SIZE=64
 
   # Aplicação principal construída localmente.
-  web:
+  app:
     image: dhsrocha/user-invoices
-    restart: always
     container_name: user-invoices
+    build:
+      context: ../
+      dockerfile: ./pub/Dockerfile # Módulo singular
+      # Variáveis
+      args:
+        - MODULE_NAME=user-invoices
+
+    # Metadados
+    labels:
+      maintainer: Diego Rocha
+      vendor: Diego Rocha
+      description: Notas fiscais
+      version: 0.1.0
+
+    # Configurações
+    restart: always
     depends_on:
       - db
       - cache

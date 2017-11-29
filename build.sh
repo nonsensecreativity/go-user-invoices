@@ -4,79 +4,69 @@
 DOCKER_COMPOSE_VERSION=1.17.1
 COMPOSE_PATH="/usr/local/bin/docker-compose"
 
-COMPOSE_YML_IMAGE="pub/docker-compose-build.yml"
-COMPOSE_YML_CONTAINER="pub/docker-compose-up.yml"
+COMPOSE_FILE="pub/docker-compose.yml"
 
 DOWNLOAD_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/run.sh"
 
-# Roteiro de construção
-echo;echo "::: Inicio da construção da imagem :::";echo
+# ::: Roteiro de construção :::
+
+echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 # :::::::::::::::::::::::::::::::
 
-{ # Instala 'docker-compose'
+{ # Instala 'docker' e 'docker-compose' caso estes recursos não estejam instalados.
 
   if [[ ! -f $COMPOSE_PATH ]];then  
 
-    echo;echo ":: Instalar 'docker-compose' ::";echo
+    echo;echo -e "\e[33m:: ferramenta 'docker-compose' não detectada. \
+	Realizar download do 'docker' e 'docker-compose'. ::\e[0m";echo
   
     sudo apt-get install --upgrade docker
 
     sudo curl -L --fail $DOWNLOAD_URL -o $COMPOSE_PATH
 
     sudo chmod +x $COMPOSE_PATH
+
+    echo;echo -e "\e[32m:: Instalação concluída. ::\e[0m";echo
+
   fi
 
 } || {
 
-  echo;echo ":: Falha na instalação das ferramentas docker. ::"
+  echo;echo -e "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m"
 
   exit 1
 
-} && { # Constroi imagem da aplicação
+} 
 
-  echo;echo ":: Executar construção da imagem docker ::";echo
+# :::::::::::::::::::::::::::::::
 
-  sudo docker-compose \
-       -f $COMPOSE_YML_IMAGE \
-       build
+{ # Ativa serviços que a aplicação é dependente.
 
-} || {
-
-  echo;echo ":: Removendo imagens defeituosas criadas. ::";echo
-
-  sudo docker-compose \
-       --file $COMPOSE_YML_IMAGE \
-       stop 
-  sudo docker-compose \
-       --file $COMPOSE_YML_IMAGE \
-       rm -f
-  sudo docker-compose \
-       -f $COMPOSE_YML_CONTAINER \
-       down -rmi -v 
-
-  echo;echo ":: Falha na construção da imagem. ::";echo
-
-  exit 1
-
-} && { # Ativa serviços dependentes e container da aplicação
-
-  echo;echo ":: Executar construção do container docker ::";echo
+  echo;echo -e "\e[34m:: Construir imagem docker da aplicação e contêineres de serviços. ::\e[0m";echo
 
   # Executa ativação
-  sudo docker-compose \
-       -f $COMPOSE_YML_CONTAINER \
-       up -d # Detached
+  sudo docker-compose -f $COMPOSE_FILE up -d --build
 
 } || {
 
-  echo;echo ":: Removendo containeres defeituosos criados. ::";echo
+  # Remove os serviços parados que eventualmente são
+  # criados para suportar a construção da aplicação.
+  STOPPED=$(docker ps -a -q --filter="status=exited")
 
-  sudo docker-compose \
-       -f $COMPOSE_YML_CONTAINER \
-       down -v 
+  if [ $STOPPED ]; then
 
-  echo;echo ":: Falha na ativação. ::";echo
+    echo;echo -e "\e[33m:: Removendo contêineres anônimos parados. ::\e[0m";echo
+
+    sudo docker rm $STOPPED
+
+  fi
+
+  echo;echo -e "\e[33m:: Removendo serviços criados em função destes contêineres. ::\e[0m";echo
+
+  sudo docker-compose -f $COMPOSE_FILE down -v 
+
+  echo;echo -e "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
 
   exit 1
 
@@ -84,5 +74,5 @@ echo;echo "::: Inicio da construção da imagem :::";echo
 
 # :::::::::::::::::::::::::::::::
 
-echo;echo "::: Construção finalizada :::";echo
+echo;echo -e "\e[32m::: Construção finalizada. :::\e[0m";echo
 
