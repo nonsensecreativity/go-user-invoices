@@ -1,78 +1,27 @@
-#!/bin/bash
+APP=user-invoices
 
-# Propriedades
-DOCKER_COMPOSE_VERSION=1.17.1
-COMPOSE_PATH="/usr/local/bin/docker-compose"
+echo;echo -e '\e[34m :: Processo construção da aplicação iniciado. ::\e[0m';echo
 
-COMPOSE_FILE="pub/docker-compose.yml"
+{
 
-DOWNLOAD_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/run.sh"
+  echo;echo -e '\e[1;34m :: Clean. ::\e[0m'
+  go clean -n -x $APP 
 
-# ::: Roteiro de construção :::
+  echo;echo -e '\e[1;34m :: Test. ::\e[0m'
+  go test -v $APP
 
-echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
+  # echo;echo -e '\e[1;34m :: Install. ::\e[0m'
+  # go install $APP
 
-# :::::::::::::::::::::::::::::::
+  echo;echo -e '\e[1;34m :: Build. ::\e[0m'
+  go build -v -o bin/$APP $APP
 
-{ # Instala 'docker' e 'docker-compose' caso estes recursos não estejam instalados.
+} || {
 
-  if [[ ! -f $COMPOSE_PATH ]];then  
-
-    echo;echo -e "\e[33m:: ferramenta 'docker-compose' não detectada. \
-	Realizar download do 'docker' e 'docker-compose'. ::\e[0m";echo
+  echo;echo -e '\e[91m :: Falha na construção. ::\e[0m';echo
   
-    sudo apt-get install --upgrade docker
-
-    sudo curl -L --fail $DOWNLOAD_URL -o $COMPOSE_PATH
-
-    sudo chmod +x $COMPOSE_PATH
-
-    echo;echo -e "\e[32m:: Instalação concluída. ::\e[0m";echo
-
-  fi
-
-} || {
-
-  echo;echo -e "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m"
-
-  exit 1
-
-} 
-
-# :::::::::::::::::::::::::::::::
-
-{ # Ativa serviços que a aplicação é dependente.
-
-  echo;echo -e "\e[34m:: Construir imagem docker da aplicação e contêineres de serviços. ::\e[0m";echo
-
-  # Executa ativação
-  sudo docker-compose -f $COMPOSE_FILE up -d --build
-
-} || {
-
-  # Remove os serviços parados que eventualmente são
-  # criados para suportar a construção da aplicação.
-  STOPPED=$(docker ps -a -q --filter="status=exited")
-
-  if [ $STOPPED ]; then
-
-    echo;echo -e "\e[33m:: Removendo contêineres anônimos parados. ::\e[0m";echo
-
-    sudo docker rm $STOPPED
-
-  fi
-
-  echo;echo -e "\e[33m:: Removendo serviços criados em função destes contêineres. ::\e[0m";echo
-
-  sudo docker-compose -f $COMPOSE_FILE down -v 
-
-  echo;echo -e "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
-
   exit 1
 
 }
 
-# :::::::::::::::::::::::::::::::
-
-echo;echo -e "\e[32m::: Construção finalizada. :::\e[0m";echo
-
+echo;echo -e '\e[32m :: Processo de construção concluído. ::\e[0m';echo
