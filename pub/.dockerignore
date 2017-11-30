@@ -1,2 +1,4 @@
-./src
-!./bin
+!src
+doc
+deploy.sh
+bin

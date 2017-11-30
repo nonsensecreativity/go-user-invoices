@@ -16,7 +16,7 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 { # Instala 'docker' e 'docker-compose' caso estes recursos não estejam instalados.
 
-  if [[ ! -f $COMPOSE_PATH ]];then  
+  if [ ! -f $COMPOSE_PATH ];then  
 
     echo;echo -e "\e[33m:: ferramenta 'docker-compose' não detectada. \
 	Realizar download do 'docker' e 'docker-compose'. ::\e[0m";echo
@@ -50,8 +50,9 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 } || {
 
-  # Remove os serviços parados que eventualmente são
-  # criados para suportar a construção da aplicação.
+  # Remove os serviços parados e imagens sem etiquetas
+  # que eventualmente são criados para suportar a 
+  # construção da aplicação.
   STOPPED=$(docker ps -a -q --filter="status=exited")
 
   if [ $STOPPED ]; then
@@ -64,7 +65,7 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
   echo;echo -e "\e[33m:: Removendo serviços criados em função destes contêineres. ::\e[0m";echo
 
-  sudo docker-compose -f $COMPOSE_FILE down -v 
+  sudo docker-compose -f $COMPOSE_FILE down -v
 
   echo;echo -e "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
 
@@ -73,6 +74,11 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 }
 
 # :::::::::::::::::::::::::::::::
+
+# TODO Imagens intermadiárias são geradas e eventualmente não são removidas, dependendo do fluxo de execução 
+echo;echo -e "\e[33m:: Removendo imagens não etiquetadas. ::\e[0m";echo
+
+sudo docker rmi $(docker images | grep "^<none>" | awk '{print $3}') 
 
 echo;echo -e "\e[32m::: Construção finalizada. :::\e[0m";echo
 
