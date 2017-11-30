@@ -21,6 +21,9 @@
 pkg/
 bin/
 
+# go get: dependencies
+github.com/
+
 # End of https://www.gitignore.io/api/go
 
 

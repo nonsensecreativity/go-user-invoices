@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Propriedades
 DOCKER_COMPOSE_VERSION=1.17.1
@@ -10,7 +10,7 @@ DOWNLOAD_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOS
 
 # ::: Roteiro de construção :::
 
-echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
+echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 # :::::::::::::::::::::::::::::::
 
@@ -18,7 +18,7 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
   if [ ! -f $COMPOSE_PATH ];then  
 
-    echo;echo -e "\e[33m:: ferramenta 'docker-compose' não detectada. \
+    echo;echo "\e[33m:: ferramenta 'docker-compose' não detectada. \
 	Realizar download do 'docker' e 'docker-compose'. ::\e[0m";echo
   
     sudo apt-get install --upgrade docker
@@ -27,13 +27,13 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
     sudo chmod +x $COMPOSE_PATH
 
-    echo;echo -e "\e[32m:: Instalação concluída. ::\e[0m";echo
+    echo;echo -"\e[32m:: Instalação concluída. ::\e[0m";echo
 
   fi
 
 } || {
 
-  echo;echo -e "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m"
+  echo;echo "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m"
 
   exit 1
 
@@ -43,7 +43,7 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 { # Ativa serviços que a aplicação é dependente.
 
-  echo;echo -e "\e[34m:: Construir imagem docker da aplicação e contêineres de serviços. ::\e[0m";echo
+  echo;echo "\e[34m:: Construir imagem docker da aplicação e contêineres de serviços. ::\e[0m";echo
 
   # Executa ativação
   sudo docker-compose -f $COMPOSE_FILE up -d --build
@@ -57,17 +57,17 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 
   if [ $STOPPED ]; then
 
-    echo;echo -e "\e[33m:: Removendo contêineres anônimos parados. ::\e[0m";echo
+    echo;echo "\e[33m:: Removendo contêineres anônimos parados. ::\e[0m";echo
 
     sudo docker rm $STOPPED
 
   fi
 
-  echo;echo -e "\e[33m:: Removendo serviços criados em função destes contêineres. ::\e[0m";echo
+  echo;echo "\e[33m:: Removendo serviços criados em função destes contêineres. ::\e[0m";echo
 
   sudo docker-compose -f $COMPOSE_FILE down -v
 
-  echo;echo -e "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
+  echo;echo "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
 
   exit 1
 
@@ -76,9 +76,9 @@ echo;echo -e "\e[34m::: Inicio da construção da imagem. :::\e[0m";echo
 # :::::::::::::::::::::::::::::::
 
 # TODO Imagens intermadiárias são geradas e eventualmente não são removidas, dependendo do fluxo de execução 
-echo;echo -e "\e[33m:: Removendo imagens não etiquetadas. ::\e[0m";echo
+echo;echo "\e[33m:: Removendo imagens não etiquetadas. ::\e[0m";echo
 
 sudo docker rmi $(docker images | grep "^<none>" | awk '{print $3}') 
 
-echo;echo -e "\e[32m::: Construção finalizada. :::\e[0m";echo
+echo;echo "\e[32m::: Construção finalizada. :::\e[0m";echo
 

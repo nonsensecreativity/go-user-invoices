@@ -1,4 +1,7 @@
-!src
-doc
+!src/
+!build.sh
+
 deploy.sh
-bin
+doc/
+bin/
+pub/

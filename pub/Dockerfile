@@ -14,14 +14,17 @@ FROM alpine AS deployer
 RUN apk --no-cache add ca-certificates
 
 # Copiar binários da imagem anterior para esta
-COPY --from=builder ./bin root/
+# COPY --from=builder bin bin/
 
 # Definir WORKDIR
-WORKDIR root/
+# WORKDIR bin
+
+# RUN ls .
 
 # Definir porta exposta
-ENTRYPOINT 5000
+EXPOSE 5000
 
-# Definir ponto de entrada
-CMD ["main"]
+# Instrução principal
+CMD ["user-invoices"]
 
+ENTRYPOINT ["user-invoices"]
