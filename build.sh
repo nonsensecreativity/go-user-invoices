@@ -67,7 +67,9 @@ echo;echo -e '\e[1;34m :: Processo construção da aplicação iniciado. ::\e[0m
 
 } || {  # Tratamento de exceção
 
-  echo;echo -e '\e[91m :: Falha na construção. ::\e[0m' >&2
+  echo;echo -e '\e[91m :: Falha na construção. ::\e[0m';echo
+
+  echo 1
 
 }
 

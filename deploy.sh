@@ -8,6 +8,17 @@ COMPOSE_FILE="pub/docker-compose.yml"
 
 DOWNLOAD_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/run.sh"
 
+remover_sem_tag() {
+
+  # TODO Imagens intermadiárias são geradas e eventualmente não são
+  # removidas, dependendo do fluxo de execução 
+  echo;echo "\e[33m:: Removendo imagens não etiquetadas. ::\e[0m";echo
+
+  sudo docker rmi $(docker images | grep "^<none>" | awk '{print $3}') 
+
+
+}
+
 # ::: Roteiro de construção :::
 
 echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
@@ -33,9 +44,7 @@ echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 } || {
 
-  echo;echo "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m"
-
-  exit 1
+  echo;echo "\e[91m:: Falha na instalação das ferramentas docker. ::\e[0m" >&2
 
 } 
 
@@ -67,6 +76,8 @@ echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
 
   sudo docker-compose -f $COMPOSE_FILE down -v
 
+  remover_sem_tag
+
   echo;echo "\e[91m:: Falha na ativação dos serviços. ::\e[0m";echo
 
   exit 1
@@ -75,10 +86,7 @@ echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
 
 # :::::::::::::::::::::::::::::::
 
-# TODO Imagens intermadiárias são geradas e eventualmente não são removidas, dependendo do fluxo de execução 
-echo;echo "\e[33m:: Removendo imagens não etiquetadas. ::\e[0m";echo
-
-sudo docker rmi $(docker images | grep "^<none>" | awk '{print $3}') 
+remover_sem_tag
 
 echo;echo "\e[32m::: Construção finalizada. :::\e[0m";echo
 

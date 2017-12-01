@@ -40,9 +40,7 @@ services:
       context: ../
       dockerfile: ./pub/Dockerfile # Módulo singular
       # Variáveis
-      args:
-        - MODULE_NAME=user-invoices
-
+ 
     # Metadados
     labels:
       maintainer: Diego Rocha

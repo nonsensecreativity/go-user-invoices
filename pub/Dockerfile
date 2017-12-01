@@ -1,5 +1,8 @@
 FROM golang:alpine AS builder
 
+# Instalar git, necessário para GO
+RUN apk update && apk add git
+
 # Copiar fontes para a imagem
 COPY . .
 
@@ -25,6 +28,6 @@ RUN apk --no-cache add ca-certificates
 EXPOSE 5000
 
 # Instrução principal
-CMD ["user-invoices"]
+# CMD ["user-invoices"]
 
-ENTRYPOINT ["user-invoices"]
+# ENTRYPOINT ["user-invoices"]
