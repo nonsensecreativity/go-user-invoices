@@ -21,7 +21,7 @@ echo;echo -e '\e[1;34m :: Processo construção da aplicação iniciado. ::\e[0m
   echo; echo -e '\e[1;34m :: Dep. ::\e[0m'
 
   # Para que 'go get' seja usado de dentro da imagem docker
-  if [ ! -f "src/$DEP" ]; then
+  if [ ! -f "./src/$DEP" ]; then
 
     echo;echo -e '\e[1;33m :: Baixando e construindo golang/dep. ::\e[0m'
     go get -u $DEP
@@ -31,14 +31,16 @@ echo;echo -e '\e[1;34m :: Processo construção da aplicação iniciado. ::\e[0m
   
   # Considerar a existência de um projeto vazio ou que
   # precisa ter o gerenciamento de dependência implementado
-  if [ -f "src/$APP/Gopkg.toml" ]; then
+  if [ ! -f "./src/$APP/Gopkg.toml" ]; then
 
-    echo;echo -e '\e[1;33m :: Gopkg.toml não encontrado. Inicializando gerenciamento de dependências. ::\e[0m'
+    echo;echo -e '\e[1;33m :: Gopkg.toml não encontrado. Inicializando gerencia\
+    mento de dependências. ::\e[0m'
     bin/dep init src/$APP
   
   else
   
-    echo;echo -e '\e[1;32m :: Gopkg.toml encontrado. Instalando as dependências registradas. ::\e[0m'
+    echo;echo -e '\e[1;32m :: Gopkg.toml encontrado. Instalando as dependências\
+    registradas. ::\e[0m'
   
   fi
   
