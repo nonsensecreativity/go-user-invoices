@@ -1,0 +1,28 @@
+version: '3.4'
+services:
+
+  test-db:
+    restart: always
+    image: postgres-pgtap
+    container_name: postgres
+    build:
+      context: ../..
+      dockerfile: ./pub/dockerfile/postgres-pgtap.Dockerfile
+    volumes:
+      - db-data:/var/lib/postgres
+      # Ponto de entrada para scripts de teste e produção
+      - ../rsc/sql/:/docker-entrypoint-initdb.d/
+      # Roteiro de teste
+      - ../rsc/sql/pgtap.sql:t/pgtap.sql
+    environment:
+      - POSTGRES_DB=pgtap
+      - POSTGRES_USER=pgtap
+      - POSTGRES_PASSWORD=pgtap
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    ports:
+      - 2345:2345
+
+volumes:
+  db-data:
+    name: pgtap_postgres-data
+

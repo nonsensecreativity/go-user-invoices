@@ -18,7 +18,7 @@ COMMENT ON COLUMN invoices.user_auth.password IS '';
 CREATE TABLE invoices.invoice (
    id           SERIAL
   ,amount       DECIMAL(18, 6)
-      CHECK (month > 0)
+      CHECK (amount > 0)
   ,document     VARCHAR(14)
   ,month        SMALLINT 
       CHECK (month <= 12)
