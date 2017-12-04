@@ -1,75 +1,76 @@
 version: '3.4'
 services:
 
-  # Serviços que a aplicação principal é dependente.
-  db:
-    restart: always
-    container_name: postgres
-    build:
-      context: ../..
-      dockerfile: ./pub/dockerfile/postgres-pgtap.Dockerfile
-    volumes:
-      - postgres-data:/var/lib/postgres
-      # Ponto de enntrada para scripts de teste e produção
-      - ../rsc/sql/:/docker-entrypoint-initdb.d/
-    environment:
-      - POSTGRES_DB=user_invoices 
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD=app
-      - POSTGRES_INITDB_ARGS=--data-checksums
-    networks:
-      - database
-    ports:
-      - 5432:5432
+ # Serviços que a aplicação principal é dependente.
+ db:
+  restart: always
+  container_name: postgres
+  build:
+   context: ../..
+   dockerfile: ./pub/dockerfile/postgres-pgtap.Dockerfile
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - ./rsc/sql/:/docker-entrypoint-init.d/
+   - pgdata:/var/lib/postgresql/data/pgdata
+  environment:
+   - POSTGRES_USER=app
+   - POSTGRES_PASSWORD=app
+   - POSTGRES_DB=user_invoices
+   - PGDATA=/var/lib/postgresql/data/pgdata
+   - POSTGRES_INITDB_ARGS=--data-checksums
+  networks:
+   - database
+  ports:
+   - 5432:5432
 
-  cache:
-    image: memcached:alpine
-    restart: always
-    container_name: memcached
-    volumes:
-      - memcached-data:/var/lib/memcached
-    networks:
-      - cache
-    ports:
-      - 11211:11211
-    environment:
-      - MEMCACHED_CACHE_SIZE=64
+ cache:
+  image: memcached:alpine
+  restart: always
+  container_name: memcached
+  volumes:
+   - memcached-data:/var/lib/memcached
+  networks:
+   - cache
+  ports:
+   - 11211:11211
+  environment:
+   - MEMCACHED_CACHE_SIZE=64
 
   # Aplicação principal construída localmente.
   app:
-    image: dhsrocha/user-invoices
-    container_name: user-invoices
-    build:
-      context: ../..
-      dockerfile: ./pub/dockefile/user-invoices.Dockerfile
-      # Variáveis
+   image: dhsrocha/user-invoices
+   container_name: user-invoices
+   build:
+    context: ../..
+    dockerfile: ./pub/dockefile/user-invoices.Dockerfile
+    # Variáveis
  
     # Metadados
-    labels:
-      maintainer: Diego Rocha
-      vendor: Diego Rocha
-      description: Gestão de notas fiscais.
-      version: 0.1.0
+   labels:
+    maintainer: Diego Rocha
+    vendor: Diego Rocha
+    description: Gestão de notas fiscais.
+    version: 0.1.0
 
     # Configurações
-    restart: always
-    depends_on:
-      - db
-      - cache
-    links:
-      - db
-      - cache
-    ports:
-      - 5000:5000
+   restart: always
+   depends_on:
+    - db
+    - cache
+   links:
+    - db
+    - cache
+   ports:
+    - 5000:5000
 
 networks:
-  database:
-    driver: bridge
-  cache:
-    driver: bridge
+ database:
+  driver: bridge
+ cache:
+  driver: bridge
 
 volumes:
-  memcached-data:
-    name: user-invoices_memcached-data
-  postgres-data:
-    name: user-invoices_postgres-data
+ memcached-data:
+  name: user-invoices_memcached-data
+ postgres-data:
+  name: user-invoices_postgres-data

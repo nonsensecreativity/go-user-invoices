@@ -1,4 +1,4 @@
-\c user_invoices;
+\c postgres;
 
 CREATE SCHEMA invoices;
 

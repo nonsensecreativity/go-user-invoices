@@ -1,28 +1,43 @@
 version: '3.4'
 services:
 
-  test-db:
-    restart: always
-    image: postgres-pgtap
-    container_name: postgres
-    build:
-      context: ../..
-      dockerfile: ./pub/dockerfile/postgres-pgtap.Dockerfile
-    volumes:
-      - db-data:/var/lib/postgres
-      # Ponto de entrada para scripts de teste e produção
-      - ../rsc/sql/:/docker-entrypoint-initdb.d/
-      # Roteiro de teste
-      - ../rsc/sql/pgtap.sql:t/pgtap.sql
-    environment:
-      - POSTGRES_DB=pgtap
-      - POSTGRES_USER=pgtap
-      - POSTGRES_PASSWORD=pgtap
-      - POSTGRES_INITDB_ARGS=--data-checksums
-    ports:
-      - 2345:2345
+ db:
+  restart: always
+  image: postgres:alpine
+  container_name: postgres
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   # Considerar local de referência do docker-compose.yml
+   # $LOCALDIR/rsc/compose
+   - ../../rsc/sql/:/docker-entrypoint-initdb.d/
+   - pgdata:/var/lib/postgresql/data
+  environment:
+   - POSTGRES_DB=pgtap
+   - POSTGRES_USER=pgtap
+   - POSTGRES_PASSWORD=pgtap
+   # - PGDATA=/var/lib/postgresql/data
+   - POSTGRES_INITDB_ARGS=--data-checksums
+  ports:
+   - 5432:5432
+
+ test-db:
+  restart: always
+  image: dhsrocha/pgtap
+  container_name: postgres
+  build:
+   context: ../../
+   dockerfile: pub/dockerfile/pgtap.Dockerfile
+   args:
+    - PGTAP_VER=v0.98.0
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - pgdata:/var/lib/postgresql/data
+  depends_on:
+   - db
+  links:
+   - db
 
 volumes:
-  db-data:
-    name: pgtap_postgres-data
+ pgdata:
+  name: pgtap-data
 

@@ -62,7 +62,7 @@ echo;echo "\e[1;34m::: Inicio da construção da imagem. :::\e[0m";echo
   sudo docker-compose \
       -p $PROJ_NAME \
       -f $COMPOSE_FILE \
-      up -d --build
+      up -d --build --remove-orphans
 
 } || {
 
